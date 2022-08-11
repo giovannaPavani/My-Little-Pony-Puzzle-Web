@@ -1,0 +1,238 @@
+<html>
+
+<head></head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Jogo da Memoria</title>
+<script type="text/javascript" src="http://ajax.microsoft.com/ajax/jquery/jquery-3.4.1.min.js"></script>
+<style type="text/css">
+    img {
+        height: 180px;
+        border-radius: 150px;
+        display: inline-block;
+        text-align: center;
+    }
+
+    span {
+        padding-top: 10px;
+        text-align: center;
+        margin: auto;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    body {
+        background-image: url("wpp.jpg");
+        background-size: 100%;
+        background-repeat: no-repeat;
+        font-family: fontemlp;
+    }
+
+    #tent{
+        position: absolute;
+        padding: 45px;
+        text-shadow: 2px 2px 2px black;
+        color: white;
+        font-size:20px;
+    }
+    /* #erro {
+        position: absolute;
+        padding-top: 100px;
+        padding-left: 500px;
+        color:orangered;
+        font-size: 50px;
+    } */
+
+    @font-face {
+        font-family: fontemlp;
+        src: url(fontemlp.ttf);
+    }
+
+    #tit {
+        text-shadow: 5px 5px 5px black;
+        text-align: center;
+        margin-left: auto;
+        font-size: 50px;
+        padding-top: 20px;
+        color: white;
+        font-size:60px;
+    }
+
+    button{
+        font-family: fontemlp;
+        color:rgb(221, 42, 156);
+        background-color: rgb(235, 192, 220);
+        padding: 10px;
+        margin:auto;
+        margin-left:700px;
+        margin-bottom:20px;
+        border-radius: 10px;
+        font-size:30px;
+        text-shadow: 2px 2px 2px black;
+        box-shadow: 4px 4px 4px rgb(31, 30, 30);
+    }
+
+
+</style>
+<script>
+    var clicou = false;
+    var virar = true;
+    var tentativas = 0;
+    var pares = 8;
+    var idAnterior;
+    var btn = false;
+    var ganhou = false;
+
+    var imgPad = "ImagemPadrao.png";
+    var posicoes = ["Imagem1.png", "Imagem1.png", "Imagem2.png", "Imagem2.png", "Imagem3.png", "Imagem3.png",
+        "Imagem4.png", "Imagem4.png", "Imagem5.png", "Imagem5.png", "Imagem6.png", "Imagem6.png", "Imagem7.png",
+        "Imagem7.png", "Imagem8.png", "Imagem8.png"
+    ];
+
+    function embaralha(lista) {
+        var indice = lista.length;
+        while (indice > 0) {
+            var indiceAleatorio = Math.floor(Math.random() * indice);
+            var aux = lista[indice - 1];
+            lista[indice - 1] = lista[indiceAleatorio];
+            lista[indiceAleatorio] = aux;
+            indice--;
+        }
+    }
+
+    $().ready(function () {
+        $('#botao').click(function(){
+        embaralha(posicoes);
+        tentativas = 0; 
+        pares = 8;
+        idAnterior= 0;
+        idAtual = 0;
+        virar = true;
+        clicou = false
+        ganhou = false;
+        for(var i = 0; i<15, i++;)
+        {
+            posicoes[i].removeClass("bloqueado");
+        }
+        $('img').attr('src', imgPad);
+        $('#tent').text('TENTATIVAS: ' + tentativas)
+        btn = true;
+        setTimeout(function(){
+            $('#botao').hide();
+        }, 100);
+        
+    });
+        $('img').click(function () {
+            if(!ganhou)
+            {
+            if(btn)
+            {
+                if (virar) {
+                if (!$("#" + idAtual).hasClass("bloqueado")) {
+                    var idAtual = $(this).attr("id");
+                    if (clicou) { // segunda carta a virar
+                        virar = false;
+                        for (var i = 1 in 16) {
+                            $('#' + i).addClass("bloqTemp");
+                        }
+                        tentativas++;
+                        var img = posicoes[idAtual - 1];
+                        $('#' + idAtual).fadeOut();
+                        $(this).attr('src', img);
+                        $('#' + idAtual).fadeIn();
+
+                        if (img == posicoes[idAnterior - 1]) {
+                            //acertou
+                            $('#' + idAtual).addClass("bloqueado");
+                            $('#' + idAnterior).addClass("bloqueado");
+                            pares--;
+                            setTimeout(function () { virar = true;}, 1000);
+                        } else {
+                            //errou    
+                            setTimeout(function () {
+                                $('#' + idAtual).fadeOut();
+                                $('#' + idAtual).attr('src', imgPad);
+                                $('#' + idAtual).fadeIn();
+
+                                $('#' + idAnterior).fadeOut();
+                                $('#' + idAnterior).attr('src', imgPad);
+                                $('#' + idAnterior).fadeIn();
+                            }, 1000);
+                            setTimeout(function () { virar = true;}, 1000);
+                        }
+                        for (var i = 1 in 16) {
+                            $('#' + i).removeClass("bloqTemp");
+                        }
+                        clicou = false;
+                    } else { // primeira carta a virar
+                        $('#' + idAtual).addClass("bloqTemp");
+                        var img = posicoes[idAtual - 1];
+                        $('#' + idAtual).fadeOut();
+                        $(this).attr('src', img);
+                        $('#' + idAtual).fadeIn();
+                        idAnterior = idAtual;
+                        clicou = true;
+                    }
+                }
+                $('#tent').text('TENTATIVAS: ' + tentativas)
+                if (pares == 0) {
+                    //GANHOU
+                    setTimeout(function(){
+                        alert("PARABÉNS, VOCÊ GANHOU EM " + tentativas +
+                        " TENTATIVAS!! CLIQUE NO BOTÃO PARA REINICIAR!!");
+                        tentativas = 0;
+                        $('#botao').text('REINICIAR');
+                        $('#botao').show(); 
+                        ganhou = true;
+                        window.scrollTo(0, 10);
+                    }, 700);
+                }
+            }
+            }
+            }
+        });
+    });
+</script>
+</head>
+
+<body>
+    <BGSOUND src="musica.mp3" loop=infinite>
+        <h1 id="tit"> JOGO DA MEMÓRIA</h1>
+        <button id="botao"> COMEÇAR </button>
+        <p id="tent"></p>
+        <!-- <p id="erro"></p> -->
+        <!-- cartineas-->
+        <span id="cartas">
+            <ul>
+                <li>
+                    <img id="1" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="2" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="3" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="4" class="bloqueado" src="ImagemPadrao.png">
+                </li>
+                <li>
+                    <img id="5" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="6" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="7" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="8" class="bloqueado" src="ImagemPadrao.png">
+                </li>
+                <li>
+                    <img id="9" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="10" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="11" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="12" class="bloqueado" src="ImagemPadrao.png">
+                </li>
+                <li>
+                    <img id="13" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="14" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="15" class="bloqueado" src="ImagemPadrao.png">
+                    <img id="16" class="bloqueado" src="ImagemPadrao.png">
+                </li>
+            </ul>
+        </span>
+</body>
+
+</html>
